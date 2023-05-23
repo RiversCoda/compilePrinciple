@@ -159,6 +159,10 @@ bool isRealNumber() //( +|-|ε ) dd*(.dd* | ε)( e ( +|-|ε ) dd*|ε)
 bool isFile()
 {
     int num = 0;
+    if( prog[pos] == '/' && !isalpha(prog[pos+1]))
+    {
+        return false;
+    }
     if (prog[pos] == '/' || prog[pos] == '\\')
     {
         num++;
