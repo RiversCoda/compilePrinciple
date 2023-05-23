@@ -1,0 +1,7 @@
+main() 
+{
+int2 a, b;
+double c = -1.32e4;
+a = 10;
+b = a + 20;
+}

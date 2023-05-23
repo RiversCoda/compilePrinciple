@@ -4,23 +4,70 @@ using namespace std;
 string prog;
 int pos = 0;
 int len;
+
+// 1 means reserved word
+// 2 means normal word
+// 3 means constant
+// 4 means operator
+// 5 means delimiter
+// 6 means wrong word
+// 7 means real number
+// 8 means file
+
 unordered_set<string> reservedWords = {
     "if", "int", "for", "while", "do", "return", "break", "continue",
     "else", "switch", "case", "default", "char", "double", "float", "long",
     "short", "void", "struct", "typedef", "static", "register", "auto",
     "const", "signed", "unsigned", "sizeof"};
 
-bool isDelimiter()
+bool isReservedWord()
 {
-    char x = prog[pos];
-    if (x == ',' || x == ';' || x == '(' || x == ')' || x == '[' || x == ']' || x == '{' || x == '}')
+
+    int rtn = 0;
+    int num = 0;
+    // 取当前位置之后的一个单词，直到遇到空格、标点符号或字符串结束为止
+    string word;
+    while (pos < prog.size() && isalpha(prog[pos]))
     {
-        pos++;
-        cout << "(5, \"" << x << "\")" << endl;
-        return true;
+        word += prog[pos++];
+        num ++;
+        if (reservedWords.count(word) > 0) // 每增加一位都判断， 使其支持错误单词截取正确部分
+        {
+            rtn = 1;
+        }
     }
-    return false;
+    if ( rtn == 0 )
+    {
+        pos -= num;
+    }
+    if(rtn == 1)
+    {
+        cout << "(1, \"" << word << "\")" << endl;
+    }
+
+    return rtn;
 }
+
+bool isNormalWord()
+{
+    int rtn = 0;
+    string word;
+    if (!isalpha(prog[pos]))
+    {
+        return false;
+    }
+    while (pos < prog.size() && isalpha(prog[pos]) || isdigit(prog[pos]) || prog[pos] == '_')
+    {
+        word += prog[pos++];
+    }
+    if (word.length() > 0)
+    {
+        cout << "(2, \"" << word << "\")" << endl;
+        rtn = 1;
+    }
+    return rtn;
+}
+
 bool isOperator()
 {
     if (prog[pos] == '+' || prog[pos] == '-')
@@ -55,81 +102,20 @@ bool isOperator()
     else
         return false;
 }
-// 识别带路径文件
-bool isFile()
+
+bool isDelimiter()
 {
-    if (prog[pos] == '/' || prog[pos] == '\\')
+    char x = prog[pos];
+    if (x == ',' || x == ';' || x == '(' || x == ')' || x == '[' || x == ']' || x == '{' || x == '}')
     {
         pos++;
-        while (pos < prog.size() && isalpha(prog[pos]) || isdigit(prog[pos]) || prog[pos] == '.' || prog[pos] == '/' || prog[pos] == '\\')
-        {
-            pos++;
-        }
+        cout << "(5, \"" << x << "\")" << endl;
         return true;
     }
+    return false;
 }
 
-bool isReservedWord()
-{
-
-    int rtn = 0;
-    int num = 0;
-    // 取当前位置之后的一个单词，直到遇到空格、标点符号或字符串结束为止
-    string word;
-    while (pos < prog.size() && isalpha(prog[pos]))
-    {
-        word += prog[pos++];
-        num ++;
-        if (reservedWords.count(word) > 0) // 每增加一位都判断， 使其支持错误单词截取正确部分
-        {
-            rtn = 1;
-        }
-    }
-    if ( rtn == 0 )
-    {
-        pos -= num;
-    }
-    if(rtn == 1)
-    {
-        cout << "(1, \"" << word << "\")" << endl;
-    }
-
-    return rtn;
-}
-
-bool isNormalWord()
-{
-    int rtn = 0;
-    string word;
-    while (pos < prog.size() && isalpha(prog[pos]) || isdigit(prog[pos]) || prog[pos] == '_')
-    {
-        word += prog[pos++];
-    }
-    if (word.length() > 0)
-    {
-        cout << "(2, \"" << word << "\")" << endl;
-        rtn = 1;
-    }
-    return rtn;
-}
-
-bool isConstant()
-{
-    int rtn = 0;
-    string word;
-    while (pos < prog.size() && isdigit(prog[pos]))
-    {
-        word += prog[pos++];
-    }
-    if (word.length() > 0)
-    {
-        rtn = 1;
-        cout << "(3, \"" << word << "\")" << endl;
-    }
-    return rtn;
-}
-
-bool isRealNumber() //( +|-|ε ) dd*(.dd* | ε)( e ( +|-|ε ) dd*|ε) 
+bool isRealNumber() //( +|-|ε ) dd*(.dd* | ε)( e ( +|-|ε ) dd*|ε)
 {
     int rtn = 0;
     string word;
@@ -169,26 +155,46 @@ bool isRealNumber() //( +|-|ε ) dd*(.dd* | ε)( e ( +|-|ε ) dd*|ε)
     return rtn;
 }
 
+// 识别带路径文件
+bool isFile()
+{
+    int num = 0;
+    if (prog[pos] == '/' || prog[pos] == '\\')
+    {
+        num++;
+        pos++;
+        while (pos < prog.size() && isalpha(prog[pos]) || isdigit(prog[pos]) || prog[pos] == '.' || prog[pos] == '/' || prog[pos] == '\\')
+        {
+            num++;
+            pos++;
+        }
+        if (num > 1)
+        {
+            cout << "(8, \"" << prog.substr(pos - num, num) << "\")" << endl;
+        }
+        return true;
+    }
+}
 
 int main()
 {
-    freopen("test.txt", "r", stdin);
-    freopen("result.txt", "w", stdout);
+    freopen("test4.txt", "r", stdin);
+    freopen("result4.txt", "w", stdout);
     while(cin >> prog)
     {
         pos = 0;
         len = prog.size();
         while (pos < len)
         {
-            if (isDelimiter())
+            if (isFile())
+            {
+
+            }
+            else if (isDelimiter())
             {
 
             }
             else if (isOperator())
-            {
-
-            }
-            else if (isFile())
             {
 
             }
@@ -197,10 +203,6 @@ int main()
 
             }
             else if (isNormalWord())
-            {
-
-            }
-            else if (isConstant())
             {
 
             }

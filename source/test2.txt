@@ -1,0 +1,7 @@
+main() 
+{
+int  a, b;
+double c = 1.324;
+a = 10;
+b = a + 20;
+}
